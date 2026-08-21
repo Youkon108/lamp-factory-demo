@@ -1,558 +1,78 @@
-function App() {
-  const products = [
-    {
-      name: "Modern Pendant Light",
-      code: "BG-PD-001",
-      category: "Pendant Lighting",
-    },
-    {
-      name: "Premium Ceiling Light",
-      code: "BG-CL-002",
-      category: "Ceiling Lighting",
-    },
-    {
-      name: "Architectural Wall Light",
-      code: "BG-WL-003",
-      category: "Wall Lighting",
-    },
-    {
-      name: "Commercial LED Light",
-      code: "BG-LED-004",
-      category: "Commercial Lighting",
-    },
-  ];
+import { useMemo, useState } from 'react'
 
-  return (
-    <div style={styles.page}>
-      <header style={styles.header}>
-        <div style={styles.logo}>
-          <div style={styles.logoMark}>B</div>
-          <div>
-            <div style={styles.logoName}>BAGGIO</div>
-            <div style={styles.logoSub}>INTERNATIONAL LIGHTING</div>
-          </div>
-        </div>
+const categoryFamilies = [
+  ['Pendant Lights', 'PD', ['Halo', 'Arc', 'Luma', 'Orbit', 'Linea', 'Nova', 'Aster', 'Forma', 'Vela', 'Miro', 'Cove', 'Eclipse', 'Sora', 'Noma']],
+  ['Chandeliers', 'CH', ['Aurelia', 'Cascade', 'Atria', 'Opus', 'Celeste', 'Mosaic', 'Lustre', 'Seren', 'Vesper', 'Crown', 'Solis', 'Rondo', 'Elara', 'Pearl']],
+  ['Ceiling Lights', 'CL', ['Lumen', 'Surface', 'Plana', 'Dome', 'Flush', 'Circa', 'Slate', 'Mira', 'Cloud', 'Edge', 'Pico', 'Tondo', 'Vitra', 'Axis']],
+  ['Wall Lights', 'WL', ['Line', 'Sconce', 'Ridge', 'Beacon', 'Calder', 'Evoke', 'Frame', 'Niche', 'Pillar', 'Wisp', 'Porto', 'Ledge', 'Lino', 'Arcade']],
+  ['Table Lamps', 'TL', ['Noma', 'Tact', 'Milo', 'Sera', 'Eon', 'Faro', 'Lido', 'Pera', 'Rae', 'Kite', 'Onda', 'Moss', 'Coda', 'Vero']],
+  ['Floor Lamps', 'FL', ['Solis', 'Arco', 'Mast', 'Tallis', 'Nora', 'Vigo', 'Pivot', 'Frame', 'Canto', 'Largo', 'Iris', 'Stem', 'Vela', 'Dawn']],
+  ['Track Lights', 'TR', ['Beam', 'Axis', 'Rail', 'Focus', 'Vector', 'Point', 'Kite', 'Zoom', 'Pivot', 'Line', 'Core', 'Flux', 'Aim', 'Studio']],
+  ['Downlights', 'DL', ['Grid', 'Recess', 'Trim', 'Halo', 'Micro', 'Deep', 'Square', 'Round', 'Edge', 'Pure', 'Soft', 'Sharp', 'Zero', 'Pro']],
+  ['Spotlights', 'SP', ['Focus', 'Accent', 'Narrow', 'Wide', 'Gallery', 'Beam', 'Pin', 'Optic', 'Scene', 'Track', 'Aim', 'Zoom', 'Vista', 'Point']],
+  ['Linear Lights', 'LI', ['Studio', 'Profile', 'Link', 'Vector', 'Contour', 'Ridge', 'Trace', 'Line', 'Channel', 'Blade', 'Modular', 'Stream', 'Lumen', 'Edge']],
+  ['Commercial Lighting', 'CO', ['Office', 'Panel', 'Work', 'Retail', 'Bay', 'Grid', 'Core', 'Pro', 'Vega', 'Matrix', 'Bright', 'Zone', 'Lattice', 'Direct']],
+  ['Outdoor Lighting', 'EX', ['Vela', 'Path', 'Bollard', 'Garden', 'Wall', 'Step', 'Flood', 'Beacon', 'Terra', 'Post', 'Marina', 'Cove', 'Lume', 'Port']],
+  ['Industrial Lighting', 'IN', ['Highbay', 'Lowbay', 'Factory', 'Linear', 'Canopy', 'Vapor', 'Worklight', 'Rugged', 'Bulkhead', 'Flood', 'Arena', 'Dock', 'Forge', 'Titan']],
+  ['Smart Lighting', 'SM', ['Connect', 'Scene', 'Tune', 'Bridge', 'Sense', 'Link', 'Voice', 'Mesh', 'Control', 'Sync', 'Smart', 'Dali', 'Pulse', 'Flow']],
+  ['Decorative Lighting', 'DE', ['Cloud', 'Petal', 'Pebble', 'Globe', 'Drape', 'Bloom', 'Candle', 'Ripple', 'Drop', 'Nest', 'Muse', 'Flora', 'Luna', 'Poise']],
+]
 
-        <nav style={styles.nav}>
-          <a href="#home">Home</a>
-          <a href="#products">Products</a>
-          <a href="#oem">OEM & ODM</a>
-          <a href="#about">About Us</a>
-          <a href="#contact">Contact</a>
-        </nav>
+const variants = [
+  ['S', 'Small', 8, 800, 3000, 20], ['M', 'Medium', 18, 1800, 3500, 40], ['L', 'Large', 32, 3200, 4000, 60], ['X', 'Extended', 48, 4800, 3000, 80], ['P', 'Premium', 65, 6200, 2700, 100], ['C', 'Compact', 12, 1100, 4000, 30], ['D', 'Dual', 24, 2400, 3500, 45], ['T', 'Triple', 36, 3600, 3000, 70], ['R', 'Round', 15, 1500, 3000, 35], ['Q', 'Pro', 55, 5400, 4000, 90], ['E', 'Eco', 10, 950, 3000, 25], ['V', 'Vertical', 22, 2100, 3500, 50], ['U', 'Ultra', 42, 4100, 2700, 75], ['N', 'Narrow', 14, 1350, 4000, 35],
+]
 
-        <a href="#quote" style={styles.quoteButton}>
-          Request a Quote
-        </a>
-      </header>
+const finishes = ['Matte black', 'Warm white', 'Brushed brass', 'Anthracite', 'Natural aluminium', 'Satin nickel']
+const materials = ['Aluminium + acrylic', 'Die-cast aluminium', 'Steel + opal diffuser', 'Glass + aluminium', 'Aluminium + PC', 'Steel + linen']
+const applications = ['Hospitality / Residential', 'Office / Retail', 'Hotel / Restaurant', 'Gallery / Museum', 'Exterior / Landscape', 'Warehouse / Commercial']
+const categories = categoryFamilies.map(([category]) => category)
 
-      <main>
-        <section id="home" style={styles.hero}>
-          <div style={styles.heroContent}>
-            <p style={styles.eyebrow}>PREMIUM LIGHTING SOLUTIONS</p>
+const products = categoryFamilies.flatMap(([category, code, names], familyIndex) => names.map((name, nameIndex) => {
+  const variant = variants[(familyIndex * 3 + nameIndex) % variants.length]
+  const [suffix, size, wattage, lumens, cct, moq] = variant
+  const sequence = familyIndex * names.length + nameIndex + 1
+  const price = Number((18 + familyIndex * 3.4 + nameIndex * 1.7 + wattage / 15).toFixed(2))
+  return {
+    id: `${code}-${String(sequence).padStart(3, '0')}`,
+    name: `${name} ${size} ${category.replace(' Lights', '')}`,
+    sku: `BG-${code}-${String(sequence).padStart(3, '0')}`,
+    category, image: `${code.toLowerCase()}-${suffix.toLowerCase()}`,
+    description: `A refined ${category.toLowerCase()} designed for dependable specification and repeatable international production.`,
+    detailedDescription: `The ${name} range balances considered proportions, efficient LED performance and robust finish quality. It is developed for professional projects where consistent light, reliable lead times and flexible branding matter.`,
+    wattage, cct, lumens, cri: wattage > 40 ? 90 : 80, voltage: '220–240V / 50–60Hz', material: materials[(familyIndex + nameIndex) % materials.length], finish: finishes[(familyIndex + nameIndex) % finishes.length], ip: ['Outdoor Lighting', 'Industrial Lighting'].includes(category) ? 'IP65' : 'IP20', dimensions: `${120 + nameIndex * 12} x ${180 + familyIndex * 18} mm`, moq: `${moq} pcs`, certifications: 'CE, RoHS, EMC', application: applications[(familyIndex + nameIndex) % applications.length], price, bulk: [Number((price * 1.12).toFixed(2)), price, Number((price * 0.88).toFixed(2))],
+  }
+}))
 
-            <h1 style={styles.heroTitle}>
-              Lighting Solutions
-              <br />
-              <span>for Global Business</span>
-            </h1>
-
-            <p style={styles.heroText}>
-              BAGGIO International Lighting provides professional lighting
-              solutions for wholesalers, distributors, retailers and
-              international business partners.
-            </p>
-
-            <div style={styles.heroButtons}>
-              <a href="#products" style={styles.primaryButton}>
-                Explore Products
-              </a>
-
-              <a href="#quote" style={styles.secondaryButton}>
-                Request a Quote
-              </a>
-            </div>
-          </div>
-
-          <div style={styles.heroVisual}>
-            <div style={styles.glow}></div>
-            <div style={styles.lamp}>
-              <div style={styles.lampTop}></div>
-              <div style={styles.lampBody}></div>
-              <div style={styles.lampLight}></div>
-            </div>
-          </div>
-        </section>
-
-        <section style={styles.trust}>
-          <div>
-            <strong>OEM & ODM</strong>
-            <span>Custom Solutions</span>
-          </div>
-
-          <div>
-            <strong>GLOBAL EXPORT</strong>
-            <span>Worldwide Business</span>
-          </div>
-
-          <div>
-            <strong>QUALITY CONTROL</strong>
-            <span>Reliable Standards</span>
-          </div>
-
-          <div>
-            <strong>INNOVATIVE DESIGN</strong>
-            <span>Modern Lighting</span>
-          </div>
-        </section>
-
-        <section id="products" style={styles.section}>
-          <p style={styles.eyebrow}>OUR PRODUCTS</p>
-
-          <h2 style={styles.sectionTitle}>Professional Lighting Collection</h2>
-
-          <p style={styles.sectionText}>
-            Explore our range of modern lighting products designed for
-            international B2B customers.
-          </p>
-
-          <div style={styles.productGrid}>
-            {products.map((product) => (
-              <div style={styles.productCard} key={product.code}>
-                <div style={styles.productImage}>
-                  <div style={styles.productLight}></div>
-                </div>
-
-                <p style={styles.category}>{product.category}</p>
-
-                <h3>{product.name}</h3>
-
-                <p style={styles.code}>Product Code: {product.code}</p>
-
-                <button style={styles.cardButton}>View Details</button>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section id="oem" style={styles.darkSection}>
-          <div>
-            <p style={styles.eyebrow}>OEM & ODM SERVICES</p>
-
-            <h2 style={styles.darkTitle}>
-              Your Design.
-              <br />
-              Our Manufacturing.
-            </h2>
-          </div>
-
-          <div style={styles.darkText}>
-            <p>
-              We support customized product development, materials, finishes,
-              branding and packaging for international customers.
-            </p>
-
-            <div style={styles.process}>
-              <span>Inquiry</span>
-              <span>→</span>
-              <span>Design</span>
-              <span>→</span>
-              <span>Sample</span>
-              <span>→</span>
-              <span>Production</span>
-              <span>→</span>
-              <span>Shipment</span>
-            </div>
-          </div>
-        </section>
-
-        <section id="about" style={styles.about}>
-          <div>
-            <p style={styles.eyebrow}>ABOUT BAGGIO</p>
-
-            <h2 style={styles.sectionTitle}>
-              Built for International Lighting Business
-            </h2>
-          </div>
-
-          <p style={styles.aboutText}>
-            BAGGIO International Lighting focuses on premium lighting
-            solutions, professional manufacturing, quality management and
-            long-term B2B partnerships. Our goal is to connect modern
-            lighting design with global business needs.
-          </p>
-        </section>
-
-        <section id="quote" style={styles.quoteSection}>
-          <p style={styles.eyebrow}>B2B INQUIRY</p>
-
-          <h2 style={styles.sectionTitle}>Request a Quote</h2>
-
-          <p style={styles.sectionText}>
-            Tell us about your product requirements and our team will prepare
-            a professional quotation.
-          </p>
-
-          <div style={styles.form}>
-            <input placeholder="Company Name" />
-            <input placeholder="Contact Person" />
-            <input placeholder="Business Email" />
-            <input placeholder="Country" />
-            <input placeholder="Product / Product Code" />
-            <input placeholder="Quantity" />
-            <textarea placeholder="Customization Requirements"></textarea>
-
-            <button style={styles.primaryButton}>Submit RFQ</button>
-          </div>
-        </section>
-      </main>
-
-      <footer id="contact" style={styles.footer}>
-        <div>
-          <div style={styles.footerLogo}>BAGGIO</div>
-          <p>INTERNATIONAL LIGHTING</p>
-        </div>
-
-        <div>
-          <strong>Global Lighting Solutions</strong>
-          <p>OEM & ODM • B2B • Global Export</p>
-        </div>
-
-        <div>
-          <strong>Contact</strong>
-          <p>Email: sales@baggio-lighting.com</p>
-          <p>WhatsApp: +86 XXX XXXX XXXX</p>
-        </div>
-      </footer>
-    </div>
-  );
+const dictionary = {
+  EN: { nav: ['Products', 'Capabilities', 'About us'], heroEyebrow: 'BAGGIO / LIGHTING MANUFACTURING', heroTitle: 'Light, made for the way business moves.', heroText: 'A dependable manufacturing partner for distinctive luminaires, considered engineering and scalable production across Europe.', explore: 'Explore collection', custom: 'Request custom quote', collection: 'The complete collection', collectionText: '210 specification-ready luminaires, organized for fast sourcing and built to flex with your brief.', search: 'Search by product, SKU or application', all: 'All categories', price: 'Max demo price', sort: 'Sort by', relevance: 'Relevance', low: 'Price: low to high', high: 'Price: high to low', newest: 'Newest first', showing: 'Showing', of: 'of', view: 'View details', quote: 'Request quote', bulk: 'Request bulk quote', advantages: 'A factory built around your brief.', advantagesText: 'From first sketch to global shipment, our team makes every handoff clear, measured and dependable.', chat: 'Chat with Sales', close: 'Close', next: 'Continue', back: 'Back', submit: 'Submit custom request', sent: 'Thank you. Your custom product request has been received.', sentSub: 'Our sales team will review your requirements and contact you shortly.' },
+  FR: { nav: ['Produits', 'Capacités', 'À propos'], heroEyebrow: 'BAGGIO / FABRICATION LUMINAIRE', heroTitle: 'La lumière, pensée pour vos projets.', heroText: 'Un partenaire industriel fiable pour des luminaires distinctifs, une ingénierie précise et une production évolutive en Europe.', explore: 'Voir la collection', custom: 'Demander un devis sur mesure', collection: 'La collection complète', collectionText: '210 luminaires prêts à spécifier, organisés pour un sourcing rapide et flexibles selon votre projet.', search: 'Rechercher par produit, SKU ou application', all: 'Toutes les catégories', price: 'Prix maximum', sort: 'Trier par', relevance: 'Pertinence', low: 'Prix croissant', high: 'Prix décroissant', newest: 'Nouveautés', showing: 'Affichage', of: 'sur', view: 'Voir les détails', quote: 'Demander un devis', bulk: 'Devis en volume', advantages: 'Une usine à l’écoute de votre projet.', advantagesText: 'Du premier croquis à l’expédition mondiale, chaque étape est claire et maîtrisée.', chat: 'Parler aux ventes', close: 'Fermer', next: 'Continuer', back: 'Retour', submit: 'Envoyer la demande', sent: 'Merci. Votre demande de produit sur mesure a été reçue.', sentSub: 'Notre équipe commerciale étudiera votre projet et vous contactera rapidement.' },
+  IT: { nav: ['Prodotti', 'Competenze', 'Chi siamo'], heroEyebrow: 'BAGGIO / PRODUZIONE ILLUMINAZIONE', heroTitle: 'Luce, progettata per il tuo business.', heroText: 'Un partner produttivo affidabile per apparecchi distintivi, ingegneria accurata e produzione scalabile in Europa.', explore: 'Esplora la collezione', custom: 'Richiedi un preventivo su misura', collection: 'La collezione completa', collectionText: '210 apparecchi pronti per la specifica, organizzati per una ricerca rapida e flessibili per il tuo progetto.', search: 'Cerca per prodotto, SKU o applicazione', all: 'Tutte le categorie', price: 'Prezzo massimo', sort: 'Ordina per', relevance: 'Rilevanza', low: 'Prezzo crescente', high: 'Prezzo decrescente', newest: 'Più recenti', showing: 'Visualizzati', of: 'di', view: 'Vedi dettagli', quote: 'Richiedi preventivo', bulk: 'Preventivo quantità', advantages: 'Una fabbrica costruita intorno al tuo brief.', advantagesText: 'Dal primo schizzo alla spedizione globale, ogni passaggio è chiaro e affidabile.', chat: 'Chat con le vendite', close: 'Chiudi', next: 'Continua', back: 'Indietro', submit: 'Invia richiesta', sent: 'Grazie. La tua richiesta di prodotto su misura è stata ricevuta.', sentSub: 'Il nostro team commerciale esaminerà i requisiti e ti contatterà a breve.' },
+  ES: { nav: ['Productos', 'Capacidades', 'Sobre nosotros'], heroEyebrow: 'BAGGIO / FABRICACIÓN DE ILUMINACIÓN', heroTitle: 'Luz, creada para tu negocio.', heroText: 'Un socio de fabricación fiable para luminarias distintivas, ingeniería precisa y producción escalable en Europa.', explore: 'Explorar colección', custom: 'Solicitar presupuesto personalizado', collection: 'La colección completa', collectionText: '210 luminarias listas para especificar, organizadas para una búsqueda rápida y flexibles para tu proyecto.', search: 'Buscar por producto, SKU o aplicación', all: 'Todas las categorías', price: 'Precio máximo', sort: 'Ordenar por', relevance: 'Relevancia', low: 'Precio ascendente', high: 'Precio descendente', newest: 'Más recientes', showing: 'Mostrando', of: 'de', view: 'Ver detalles', quote: 'Solicitar presupuesto', bulk: 'Presupuesto por volumen', advantages: 'Una fábrica pensada para tu proyecto.', advantagesText: 'Del primer boceto al envío global, cada paso es claro y fiable.', chat: 'Chat con ventas', close: 'Cerrar', next: 'Continuar', back: 'Atrás', submit: 'Enviar solicitud', sent: 'Gracias. Hemos recibido tu solicitud de producto personalizado.', sentSub: 'Nuestro equipo comercial revisará los requisitos y te contactará pronto.' },
 }
 
-const styles = {
-  page: {
-    margin: 0,
-    fontFamily: "Arial, Helvetica, sans-serif",
-    color: "#171717",
-    background: "#ffffff",
-  },
+const advantages = ['Factory direct', 'Competitive pricing', 'OEM / ODM', 'Custom manufacturing', 'Quality control', 'Fast sampling', 'Flexible MOQ', 'Global shipping']
 
-  header: {
-    height: "76px",
-    padding: "0 6%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderBottom: "1px solid #eeeeee",
-    position: "sticky",
-    top: 0,
-    background: "rgba(255,255,255,0.96)",
-    zIndex: 10,
-  },
+function App() {
+  const [language, setLanguage] = useState('EN'); const [query, setQuery] = useState(''); const [category, setCategory] = useState('All categories'); const [priceCap, setPriceCap] = useState(200); const [sort, setSort] = useState('relevance'); const [page, setPage] = useState(1); const [selected, setSelected] = useState(null); const [quoteOpen, setQuoteOpen] = useState(false); const [sent, setSent] = useState(false); const [step, setStep] = useState(1); const [chatOpen, setChatOpen] = useState(false)
+  const t = dictionary[language]; const pageSize = 16
+  const filtered = useMemo(() => { const result = products.filter((product) => (category === 'All categories' || product.category === category) && product.price <= priceCap && `${product.name} ${product.sku} ${product.application} ${product.description}`.toLowerCase().includes(query.toLowerCase())); if (sort === 'low') result.sort((a, b) => a.price - b.price); if (sort === 'high') result.sort((a, b) => b.price - a.price); if (sort === 'newest') result.reverse(); return result }, [category, priceCap, query, sort])
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize)); const visible = filtered.slice((page - 1) * pageSize, page * pageSize)
+  const updateFilter = (setter, value) => { setter(value); setPage(1) }; const openQuote = (product = null) => { setSelected(product); setQuoteOpen(true); setSent(false); setStep(1) }; const closeQuote = () => { setQuoteOpen(false); setSent(false) }
 
-  logo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-  },
+  return <div className="site-shell"><header className="header"><a className="brand" href="#home"><span className="brand-mark">B</span><span><strong>BAGGIO</strong><small>INTERNATIONAL LIGHTING</small></span></a><nav>{t.nav.map((item, index) => <a key={item} href={['#products', '#capabilities', '#about'][index]}>{item}</a>)}</nav><div className="header-actions"><div className="language-switcher">{Object.keys(dictionary).map((lang) => <button className={language === lang ? 'active' : ''} key={lang} onClick={() => setLanguage(lang)}>{lang}</button>)}</div><button className="button dark header-quote" onClick={() => openQuote()}>{t.quote} <span>↗</span></button></div></header>
+    <main><section id="home" className="hero"><div className="hero-copy"><p className="kicker">{t.heroEyebrow}</p><h1>{t.heroTitle}</h1><p className="hero-lead">{t.heroText}</p><div className="hero-buttons"><a className="button dark" href="#products">{t.explore} <span>↘</span></a><button className="button outline" onClick={() => openQuote()}>{t.custom}</button></div><div className="hero-proof"><span>●</span><p><strong>Trusted production partner</strong><br />for European lighting businesses</p></div></div><div className="hero-art"><div className="art-label">01 / 04</div><div className="sun"></div><div className="pendant"><i></i><b></b><em></em></div><div className="art-caption"><strong>Design-led production</strong><span>Made for hospitality, retail and residential spaces.</span></div></div></section>
+      <section className="metrics"><div><strong>210</strong><span>catalog products</span></div><div><strong>15</strong><span>lighting categories</span></div><div><strong>42</strong><span>export markets</span></div><div><strong>ISO</strong><span>quality process</span></div></section>
+      <section id="products" className="catalog section-wrap"><div className="section-heading"><div><p className="kicker">02 / COLLECTION</p><h2>{t.collection}</h2><p>{t.collectionText}</p></div><button className="button outline" onClick={() => openQuote()}>{t.custom} <span>↗</span></button></div><div className="catalog-toolbar"><div className="search"><span>⌕</span><input value={query} onChange={(event) => updateFilter(setQuery, event.target.value)} placeholder={t.search} /></div><div className="filter-control"><label>{t.price}: ${priceCap}</label><input type="range" min="20" max="200" value={priceCap} onChange={(event) => updateFilter(setPriceCap, Number(event.target.value))} /></div><label className="sort-control">{t.sort}<select value={sort} onChange={(event) => updateFilter(setSort, event.target.value)}><option value="relevance">{t.relevance}</option><option value="low">{t.low}</option><option value="high">{t.high}</option><option value="newest">{t.newest}</option></select></label></div><div className="category-list"><button className={category === 'All categories' ? 'selected' : ''} onClick={() => updateFilter(setCategory, 'All categories')}>{t.all}</button>{categories.map((item) => <button className={category === item ? 'selected' : ''} key={item} onClick={() => updateFilter(setCategory, item)}>{item}</button>)}</div><div className="catalog-count">{t.showing} {filtered.length ? (page - 1) * pageSize + 1 : 0}–{Math.min(page * pageSize, filtered.length)} {t.of} {filtered.length}</div><div className="product-grid">{visible.map((product) => <ProductCard key={product.sku} product={product} t={t} onView={() => setSelected(product)} onQuote={() => openQuote(product)} />)}</div>{filtered.length === 0 && <div className="empty">No products match these filters. Try a wider price range or another search.</div>}<div className="pagination"><button disabled={page === 1} onClick={() => setPage(page - 1)}>←</button>{Array.from({ length: pageCount }, (_, index) => index + 1).slice(Math.max(0, page - 3), page + 2).map((number) => <button className={page === number ? 'active' : ''} key={number} onClick={() => setPage(number)}>{number}</button>)}<button disabled={page === pageCount} onClick={() => setPage(page + 1)}>→</button></div></section>
+      <section id="capabilities" className="capabilities"><div className="section-wrap capabilities-inner"><div><p className="kicker light">03 / THE FACTORY</p><h2>{t.advantages}</h2><p>{t.advantagesText}</p><button className="button cream" onClick={() => openQuote()}>{t.custom} <span>↗</span></button></div><div className="advantage-grid">{advantages.map((item, index) => <div key={item}><span>0{index + 1}</span><strong>{item}</strong></div>)}</div></div></section><section id="about" className="about section-wrap"><div><p className="kicker">04 / WORK WITH US</p><h2>From first idea<br /><i>to final light.</i></h2></div><div className="about-copy"><p>We combine thoughtful design, responsive engineering and disciplined production to help lighting brands move with confidence.</p><div className="process"><span>Brief</span><b>→</b><span>Sample</span><b>→</b><span>Approve</span><b>→</b><span>Produce</span></div></div></section></main>
+    <footer><div className="brand footer-brand"><span className="brand-mark">B</span><span><strong>BAGGIO</strong><small>INTERNATIONAL LIGHTING</small></span></div><p>Made for the next generation of spaces.<br />sales@baggio-lighting.com · WhatsApp +86 XXX XXXX XXXX</p><small>© 2026 BAGGIO International Lighting</small></footer><button className="chat-fab" onClick={() => setChatOpen(true)}><span>✦</span>{t.chat}</button>{selected && !quoteOpen && <ProductDialog product={selected} t={t} onClose={() => setSelected(null)} onQuote={() => openQuote(selected)} />}{quoteOpen && <QuoteDialog product={selected} t={t} language={language} step={step} setStep={setStep} sent={sent} onSubmit={() => setSent(true)} onClose={closeQuote} />}{chatOpen && <ChatDialog t={t} onClose={() => setChatOpen(false)} />}</div>
+}
 
-  logoMark: {
-    width: "42px",
-    height: "42px",
-    background: "#111111",
-    color: "#d6ad55",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "25px",
-    fontWeight: "800",
-    borderRadius: "8px",
-  },
+function ProductCard({ product, t, onView, onQuote }) { return <article className="product-card"><div className={`product-visual ${product.image}`}><span>{product.category}</span><div className="mini-lamp"></div></div><div className="product-info"><p className="sku">{product.sku}</p><h3>{product.name}</h3><p className="product-description">{product.description}</p><div className="price-line"><strong>Demo Price ${product.price.toFixed(2)}</strong><span>{product.moq}</span></div><div className="card-actions"><button className="text-button" onClick={onView}>{t.view} <span>↗</span></button><button className="small-quote" onClick={onQuote}>{t.quote}</button></div></div></article> }
 
-  logoName: {
-    fontSize: "22px",
-    fontWeight: "800",
-    letterSpacing: "4px",
-  },
+function ProductDialog({ product, t, onClose, onQuote }) { return <div className="modal-backdrop" onMouseDown={onClose}><div className="product-dialog" onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" onClick={onClose}>×</button><div className={`dialog-visual product-visual ${product.image}`}><div className="mini-lamp"></div></div><div className="dialog-details"><p className="kicker">{product.category} / {product.sku}</p><h2>{product.name}</h2><p className="dialog-price">Estimated B2B Price <strong>${product.price.toFixed(2)} / piece</strong></p><p className="dialog-intro">{product.detailedDescription}</p><dl><div><dt>Wattage / output</dt><dd>{product.wattage}W · {product.lumens} lm</dd></div><div><dt>CCT / CRI</dt><dd>{product.cct}K · CRI {product.cri}</dd></div><div><dt>Voltage</dt><dd>{product.voltage}</dd></div><div><dt>Material / finish</dt><dd>{product.material} · {product.finish}</dd></div><div><dt>Dimensions / IP</dt><dd>{product.dimensions} · {product.ip}</dd></div><div><dt>MOQ / certifications</dt><dd>{product.moq} · {product.certifications}</dd></div><div><dt>Application</dt><dd>{product.application}</dd></div></dl><div className="bulk-pricing"><strong>Quantity pricing</strong><span>1–{Number(product.moq.replace(/\D/g, '')) - 1} pcs · ${product.bulk[0].toFixed(2)}</span><span>{product.moq}–199 pcs · ${product.bulk[1].toFixed(2)}</span><span>200+ pcs · ${product.bulk[2].toFixed(2)}</span></div><div className="dialog-actions"><button className="button dark" onClick={onQuote}>{t.quote} <span>↗</span></button><button className="button outline" onClick={onQuote}>{t.bulk}</button></div></div></div></div> }
 
-  logoSub: {
-    fontSize: "8px",
-    letterSpacing: "2px",
-    color: "#777",
-  },
+function QuoteDialog({ product, t, language, step, setStep, sent, onSubmit, onClose }) { const labels = ['Product', 'Requirements', 'Reference', 'Buyer information', 'Review']; return <div className="modal-backdrop"><div className="quote-dialog"><button className="modal-close" onClick={onClose}>×</button>{sent ? <div className="success"><span>✓</span><h2>{t.sent}</h2><p>{t.sentSub}</p><button className="button dark" onClick={onClose}>{t.close}</button></div> : <><div className="quote-head"><p className="kicker">CUSTOM PRODUCT REQUEST</p><h2>Build the right light.</h2><p>Share the details and our team will turn your brief into a clear next step.</p></div><div className="stepper">{labels.map((label, index) => <span className={step >= index + 1 ? 'current' : ''} key={label}><b>{index + 1}</b>{label}</span>)}</div><div className="quote-form">{step === 1 && <div className="form-grid"><label>Product<select defaultValue={product?.sku || ''}><option value="">Select a product</option>{products.map((item) => <option key={item.sku} value={item.sku}>{item.name} · {item.sku}</option>)}</select></label><label>Product SKU<input defaultValue={product?.sku || ''} placeholder="e.g. BG-PD-001" /></label><label>Quantity<input type="number" min="1" placeholder="pcs" /></label><label className="full">Product type<select><option>Standard product</option><option>Custom product</option></select></label></div>}{step === 2 && <div className="form-grid"><label>Custom width<input placeholder="mm" /></label><label>Custom height<input placeholder="mm" /></label><label>Custom diameter<input placeholder="mm" /></label><label>Custom color<input placeholder="RAL / Pantone / description" /></label><label>Material<input placeholder="e.g. aluminium, glass" /></label><label>Finish<input placeholder="e.g. brushed brass" /></label><label>Cable length<input placeholder="mm" /></label><label>Light source / bulb type<input placeholder="e.g. LED, E27" /></label><label>Color temperature<select><option>3000K warm white</option><option>2700K</option><option>4000K neutral white</option><option>6500K</option></select></label><label>Quantity / MOQ<input placeholder="pcs" /></label><label className="full">Target price <small>(optional)</small><input placeholder="USD / piece" /></label></div>}{step === 3 && <div className="form-grid"><label className="upload full">Upload a reference image or specification<input type="file" accept="image/*,.pdf,.doc,.docx" /><span>＋ Choose files</span></label><label className="full">Additional requirements<textarea placeholder="Tell us about packaging, branding, certifications or anything else we should know."></textarea></label></div>}{step === 4 && <div className="form-grid"><label>Name<input placeholder="Your full name" /></label><label>Company name<input placeholder="Company" /></label><label>Country<select><option>France</option><option>Italy</option><option>Spain</option><option>Other European country</option></select></label><label>Email<input type="email" placeholder="name@company.com" /></label><label>WhatsApp / Phone<input placeholder="+33 ..." /></label><label>Preferred language<select defaultValue={language}><option>English</option><option>French</option><option>Italian</option><option>Spanish</option></select></label></div>}{step === 5 && <div className="review"><div><span>Product</span><strong>{product?.name || 'Your selected product'}</strong></div><div><span>Requirements</span><strong>Custom dimensions, finish and light source</strong></div><div><span>Reference</span><strong>Files and notes attached</strong></div><div><span>Buyer</span><strong>Your contact details</strong></div><p>By submitting, you are sending a demonstration inquiry to the BAGGIO sales team. Prices shown are estimates only.</p></div>}</div><div className="quote-footer">{step > 1 && <button className="button outline" onClick={() => setStep(step - 1)}>{t.back}</button>}<span>Step {step} of 5</span>{step < 5 ? <button className="button dark" onClick={() => setStep(step + 1)}>{t.next} <span>→</span></button> : <button className="button dark" onClick={onSubmit}>{t.submit} <span>↗</span></button>}</div></>}</div></div> }
 
-  nav: {
-    display: "flex",
-    gap: "28px",
-  },
+function ChatDialog({ t, onClose }) { return <div className="chat-panel"><div className="chat-top"><div><strong>{t.chat}</strong><span><i></i> Typically replies in 2 hours</span></div><button onClick={onClose}>×</button></div><div className="chat-body"><div className="sales-message">Hello, how can we help with your lighting project?</div><div className="chat-time">BAGGIO SALES · NOW</div></div><div className="chat-input"><input placeholder="Type your question..." /><button aria-label="Send message">→</button></div></div> }
 
-  navLink: {},
-
-  quoteButton: {
-    background: "#111",
-    color: "#fff",
-    padding: "13px 20px",
-    textDecoration: "none",
-    fontSize: "13px",
-    fontWeight: "600",
-  },
-
-  hero: {
-    minHeight: "620px",
-    padding: "70px 8%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    background: "#f7f5f1",
-  },
-
-  heroContent: {
-    maxWidth: "620px",
-  },
-
-  eyebrow: {
-    color: "#a37b2c",
-    fontSize: "12px",
-    fontWeight: "700",
-    letterSpacing: "3px",
-  },
-
-  heroTitle: {
-    fontSize: "58px",
-    lineHeight: "1.05",
-    margin: "20px 0",
-    fontWeight: "800",
-  },
-
-  heroText: {
-    fontSize: "17px",
-    lineHeight: "1.8",
-    color: "#666",
-    maxWidth: "570px",
-  },
-
-  heroButtons: {
-    display: "flex",
-    gap: "14px",
-    marginTop: "32px",
-  },
-
-  primaryButton: {
-    background: "#111",
-    color: "#fff",
-    padding: "15px 25px",
-    border: "none",
-    textDecoration: "none",
-    cursor: "pointer",
-    fontWeight: "700",
-  },
-
-  secondaryButton: {
-    border: "1px solid #222",
-    color: "#222",
-    padding: "15px 25px",
-    textDecoration: "none",
-    fontWeight: "700",
-  },
-
-  heroVisual: {
-    width: "400px",
-    height: "400px",
-    position: "relative",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  glow: {
-    position: "absolute",
-    width: "300px",
-    height: "300px",
-    background: "#ead39b",
-    borderRadius: "50%",
-    filter: "blur(70px)",
-    opacity: 0.45,
-  },
-
-  lamp: {
-    position: "relative",
-    width: "230px",
-    height: "300px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-
-  lampTop: {
-    width: "8px",
-    height: "70px",
-    background: "#222",
-  },
-
-  lampBody: {
-    width: "210px",
-    height: "120px",
-    background: "#151515",
-    borderRadius: "50% 50% 15% 15%",
-  },
-
-  lampLight: {
-    width: "130px",
-    height: "100px",
-    background: "#ffe5a5",
-    borderRadius: "50%",
-    filter: "blur(20px)",
-    marginTop: "-5px",
-  },
-
-  trust: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    padding: "35px 8%",
-    borderBottom: "1px solid #eee",
-    textAlign: "center",
-  },
-
-  section: {
-    padding: "90px 8%",
-    textAlign: "center",
-  },
-
-  sectionTitle: {
-    fontSize: "42px",
-    margin: "15px auto",
-    maxWidth: "800px",
-  },
-
-  sectionText: {
-    color: "#777",
-    maxWidth: "650px",
-    margin: "0 auto 50px",
-    lineHeight: "1.7",
-  },
-
-  productGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "22px",
-    textAlign: "left",
-  },
-
-  productCard: {
-    border: "1px solid #e7e7e7",
-    padding: "15px",
-    background: "#fff",
-  },
-
-  productImage: {
-    height: "250px",
-    background: "#f2f1ef",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  productLight: {
-    width: "130px",
-    height: "130px",
-    background: "linear-gradient(145deg, #222, #777)",
-    borderRadius: "50%",
-    boxShadow: "0 25px 40px rgba(0,0,0,0.2)",
-  },
-
-  category: {
-    color: "#a37b2c",
-    fontSize: "11px",
-    marginTop: "20px",
-    fontWeight: "700",
-  },
-
-  code: {
-    color: "#888",
-    fontSize: "12px",
-  },
-
-  cardButton: {
-    background: "#111",
-    color: "#fff",
-    border: "none",
-    padding: "11px 18px",
-    cursor: "pointer",
-  },
-
-  darkSection: {
-    background: "#111",
-    color: "#fff",
-    padding: "100px 8%",
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "80px",
-  },
-
-  darkTitle: {
-    fontSize: "50px",
-    lineHeight: "1.1",
-  },
-
-  darkText: {
-    color: "#ccc",
-    lineHeight: "1.8",
-    fontSize: "17px",
-  },
-
-  process: {
-    marginTop: "40px",
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "12px",
-    color: "#d6ad55",
-  },
-
-  about: {
-    padding: "100px 8%",
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "80px",
-  },
-
-  aboutText: {
-    color: "#666",
-    lineHeight: "2",
-    fontSize: "17px",
-  },
-
-  quoteSection: {
-    padding: "90px 8%",
-    textAlign: "center",
-    background: "#f7f5f1",
-  },
-
-  form: {
-    maxWidth: "800px",
-    margin: "40px auto",
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "15px",
-    textAlign: "left",
-  },
-
-  input: {
-    padding: "15px",
-  },
-
-  footer: {
-    background: "#111",
-    color: "#fff",
-    padding: "60px 8%",
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
-    gap: "40px",
-  },
-
-  footerLogo: {
-    fontSize: "28px",
-    fontWeight: "800",
-    letterSpacing: "5px",
-  },
-};
-
-export default App;
+export default App
