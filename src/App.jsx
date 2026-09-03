@@ -54,6 +54,29 @@ const advantages = ['Factory direct', 'Competitive pricing', 'OEM / ODM', 'Custo
 
 function App() {
   const [language, setLanguage] = useState('EN'); const [query, setQuery] = useState(''); const [category, setCategory] = useState('All categories'); const [priceCap, setPriceCap] = useState(200); const [sort, setSort] = useState('relevance'); const [page, setPage] = useState(1); const [selected, setSelected] = useState(null); const [quoteOpen, setQuoteOpen] = useState(false); const [sent, setSent] = useState(false); const [step, setStep] = useState(1); const [chatOpen, setChatOpen] = useState(false)
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9090";
+
+    fetch(`${API_URL}/api/products`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load products");
+        return res.json();
+      })
+      .then((data) => {
+        setProducts(data.content ?? data);
+      })
+      .catch((error) => {
+        console.error("Product API error:", error);
+        setProducts([]);
+      })
+      .finally(() => {
+        setLoadingProducts(false);
+      });
+  }, []);
+  
   const t = dictionary[language]; const pageSize = 16
   const filtered = useMemo(() => { const result = products.filter((product) => (category === 'All categories' || product.category === category) && product.price <= priceCap && `${product.name} ${product.sku} ${product.application} ${product.description}`.toLowerCase().includes(query.toLowerCase())); if (sort === 'low') result.sort((a, b) => a.price - b.price); if (sort === 'high') result.sort((a, b) => b.price - a.price); if (sort === 'newest') result.reverse(); return result }, [category, priceCap, query, sort])
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize)); const visible = filtered.slice((page - 1) * pageSize, page * pageSize)
